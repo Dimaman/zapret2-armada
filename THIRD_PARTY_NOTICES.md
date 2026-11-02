@@ -1,7 +1,7 @@
 # Copyright and redistribution
 
 Original Zapret2 Armada code: Copyright (c) 2026 Dimaman and contributors,
-GPL-2.0-or-later (LICENSE). No Zapret Deck or Armada implementation is copied.
+GPL-2.0-or-later (LICENSE). No Zapret Deck or Armada implementation code is copied.
 Decky Loader itself is not bundled. Its public API is used.
 
 Engine and Lua: bol-van/zapret2 v1.0.6, MIT, Copyright 2016–2026 bol-van.
@@ -26,3 +26,8 @@ Bundled frontend dependencies: @decky/api 1.1.3 (BSD-3-Clause), tslib 2.8.1
 by Decky/Steam. Rollup configuration follows the BSD-3-Clause Decky template
 convention, Copyright 2022–2024 Steam Deck Homebrew; complete notice is in
 `docs/DECKY_TEMPLATE_LICENSE`. No upstream name implies endorsement.
+
+Optional domain list data: rosakodu/zapret-deck, BSD-3-Clause, Copyright (c)
+2026 rosakodu. Its complete notice is in docs/ZAPRET_DECK_LICENSE. Updates
+resolve the main branch to an immutable commit before downloading both files;
+URL, source SHA256 and commit are recorded in domain-sources.json.

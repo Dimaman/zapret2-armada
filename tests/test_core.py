@@ -180,6 +180,22 @@ class NftTests(unittest.TestCase):
 
 
 class ProbeTests(unittest.TestCase):
+    def test_domain_updates_pin_snapshot_and_reject_commands(self):
+        from backend.domain_sources import update
+        calls=[]
+        def fetch(url,limit):
+            calls.append((url,limit))
+            if len(calls)==1:return json.dumps({'object':{'sha':'a'*40,'type':'commit'}}).encode()
+            return b'Example.COM\nyoutube.com\n'
+        names,source=update(fetch)
+        self.assertEqual(names,['example.com','youtube.com'])
+        self.assertEqual(len(source),2)
+        self.assertTrue(all('/'+'a'*40+'/lists/' in u for u,_ in calls[1:]))
+        def bad(url,limit):
+            if 'api.github.com' in url:return json.dumps({'object':{'sha':'a'*40,'type':'commit'}}).encode()
+            return b'example.com\n$(touch /root/evil)\n'
+        with self.assertRaises(ValueError):update(bad)
+
     def test_private_dns_is_rejected_before_connect(self):
         calls = []
         def runner(args,**kw):

@@ -11,7 +11,7 @@ A draft release must not be treated as an installable release.
 - React/TypeScript, @decky/api v1, @decky/ui, Russian/English.
 - Enable/disable/restart, persistent systemd supervisor, bounded rotating logs.
 - Structured profiles, import/edit/save/rollback; no arbitrary Lua/command RPC.
-- Included/excluded domain lists, text import/export, bundled seed restoration.
+- Included/excluded domain lists, text import/export, bundled seeds and audited source updates.
 - Optional QUIC UDP 443; all UDP disabled by default.
 - Owned atomic nftables table, queue bypass if listener stops; no foreign firewall,
   DNS, routes or VPN configuration changes. Wi-Fi `wl*` only.

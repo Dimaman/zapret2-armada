@@ -74,7 +74,8 @@ function Content() {
       {button(`${t.exclude} (${s.config.exclude.length})`,() => editDomains("exclude"))}
       {button(t.testDomains,() => showModal(<TextEditor title={t.testDomains} initial={s.config.test_domains.join("\n")} labels={t} save={async value => {await act("configure",{test_domains:value.split(/\s+/).filter(Boolean)});}} />))}
       {button(t.export,() => {void act("export").then(r => viewText(t.export,r)).catch(() => {});})}
-      {button(t.update,() => fire("update_domains"))}
+      {button(t.update,() => confirm(t.update,t.updateInfo,() => fire("update_domains")))}
+      {button(t.seed,() => fire("restore_seed"))}
     </PanelSection>}
     {s && page === "diagnostics" && <PanelSection title={t.diagnostics}>
       {button(t.diagnose,() => {void act<{network:{control:{https:boolean};targets:{https:boolean}[]}}>("diagnose").then(r => {

@@ -9,6 +9,7 @@ import threading
 from .commands import run
 from .config_manager import ConfigManager, DEFAULT, atomic_write, domains, profile, validate, process_identity, recover_test
 from .diagnostics import network, probe, system
+from .domain_sources import update as remote_domains
 from .nftables_manager import NftablesManager, OWNER
 from .strategy_manager import check_engine, copy_runtime, QUEUE
 
@@ -287,8 +288,15 @@ class ZapretManager:
             elif operation == "logs":
                 return {"text": self.logs()}
             elif operation == "export":
-                return {"domains": "\n".join(c["domains"]), "exclude": "\n".join(c["exclude"]), "profiles": c["profiles"]}
+                provenance = self.root / "domain-sources.json"
+                return {"domains": "\n".join(c["domains"]), "exclude": "\n".join(c["exclude"]), "profiles": c["profiles"],
+                        "sources": json.loads(provenance.read_text()) if provenance.exists() else []}
             elif operation == "update_domains":
+                downloaded, provenance = remote_domains()
+                c["domains"] = sorted(set(c["domains"] + downloaded))
+                self.apply(c)
+                atomic_write(self.root / "domain-sources.json", json.dumps(provenance, indent=2))
+            elif operation == "restore_seed":
                 # Auditable source: bundled list from this signed-off plugin version.
                 source = json.loads((self.plugin / "configs/default-domains.json").read_text())
                 c["domains"] = sorted(set(c["domains"] + domains("\n".join(source["domains"]))))

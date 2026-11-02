@@ -28,8 +28,9 @@ plugin support. The immutable Fedora bootc image is not modified.
 - Wi-Fi interfaces wl* only; TCP 80/443 and optional QUIC UDP 443. Marked traffic,
   common LAN/reserved addresses and tunnel devices are bypassed. No route/DNS/VPN
   configuration or foreign firewall tables are changed.
-- No remote domain-list downloads, unrestricted Lua import or desktop tray.
-  A maintained seed domain list is included in this version.
+- Remote list updates support only the two allowlisted zapret-deck domain files,
+  pinned to a resolved commit and validated. No arbitrary source URLs,
+  unrestricted Lua import or desktop tray. Bundled seed domains are also included.
 - Hard termination of Decky during the stopped baseline may delay restoration
   until backend reload or reboot; traffic remains fail-open.
 - Testing temporarily restarts the engine. Use fresh connections. Diagnostic

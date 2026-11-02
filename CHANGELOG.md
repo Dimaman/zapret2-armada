@@ -5,7 +5,8 @@
 - Native nfqws2 1.0.6 with matching Lua, pinned-source ARM64 build.
 - Decky API v1 React/TypeScript interface, Russian/English.
 - Safe TCP split/disorder profiles; QUIC UDP 443 disabled by default.
-- Profile edit/import/save, domain/exclusion text import/export.
+- Profile edit/import/save, domain/exclusion text import/export and snapshot-pinned
+  updates from the allowlisted zapret-deck domain sources.
 - Atomic configuration, rollback and last-configuration restore.
 - systemd persistence and restart-on-failure outside the bootc image.
 - Owned nftables table, absent-listener bypass, VPN/marked/LAN exclusions.
