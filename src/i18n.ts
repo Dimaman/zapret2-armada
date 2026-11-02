@@ -1,0 +1,31 @@
+export const text = {
+  ru: {
+    dashboard: "Главная", strategies: "Стратегии", domains: "Домены", diagnostics: "Диагностика", settings: "Настройки",
+    section: "Раздел", enable: "Zapret2 включён", active: "Работает", inactive: "Остановлен", refresh: "Обновить состояние",
+    restart: "Перезапустить", strategy: "Стратегия", udp: "Обработка QUIC / UDP 443", udpInfo: "Выключено по умолчанию. Голос Discord и игровой UDP не перехватываются.",
+    auto: "Автозапуск с системой", diagnose: "Проверить систему и соединение", logs: "Показать логи", reset: "Сбросить настройки",
+    recover: "Остановить и убрать свои правила", restore: "Восстановить прошлую конфигурацию", install: "Подготовить / обновить службу",
+    tune: "Протестировать стратегии", cancel: "Отменить тест", apply: "Применить рекомендацию", newProfile: "Создать профиль", importProfile: "Импортировать JSON профиля",
+    include: "Список доменов", exclude: "Исключения", export: "Экспортировать списки и профили", update: "Восстановить домены из комплекта",
+    connection: "Соединение: нажми «Диагностика» для проверки", save: "Сохранить", close: "Закрыть", copy: "Копировать",
+    name: "Название", id: "Идентификатор", method: "Метод", position: "Позиция разделения (1–32)", repeats: "Повторы (1–3)",
+    edit: "Редактировать текущий профиль", testDomains: "Тестовые домены (до трёх)", language: "Язык / Language",
+    warning: "Экспериментальный выпуск. На Odin 3 ещё не проверен.", tuneInfo: "Сначала будет измерена доступность без Zapret2, затем проверены профили. Текущая конфигурация временно изменится и будет восстановлена. Существующие соединения не перепроверяются. Это может занять несколько минут. Рекомендация применяется отдельно.",
+    hint: "Один домен на строку. Вставка текста — импорт; Steam+X открывает клавиатуру.", copied: "Скопировано", busy: "Выполняется…",
+  },
+  en: {
+    dashboard: "Dashboard", strategies: "Strategies", domains: "Domains", diagnostics: "Diagnostics", settings: "Settings",
+    section: "Section", enable: "Enable Zapret2", active: "Running", inactive: "Stopped", refresh: "Refresh status",
+    restart: "Restart", strategy: "Strategy", udp: "Process QUIC / UDP 443", udpInfo: "Off by default. Discord voice and game UDP are excluded.",
+    auto: "Start with system", diagnose: "Check system and connectivity", logs: "View logs", reset: "Reset configuration",
+    recover: "Stop and remove owned rules", restore: "Restore previous configuration", install: "Prepare / update service",
+    tune: "Test strategies", cancel: "Cancel test", apply: "Apply suggestion", newProfile: "Create profile", importProfile: "Import profile JSON",
+    include: "Included domains", exclude: "Excluded domains", export: "Export lists and profiles", update: "Restore bundled seed domains",
+    connection: "Connection: run Diagnostics to check", save: "Save", close: "Close", copy: "Copy",
+    name: "Name", id: "Identifier", method: "Method", position: "Split position (1–32)", repeats: "Repeats (1–3)",
+    edit: "Edit selected profile", testDomains: "Test domains (up to three)", language: "Language / Язык",
+    warning: "Experimental release. Not tested on Odin 3 hardware yet.", tuneInfo: "Measure baseline without Zapret2, then test profiles. Your current configuration will change temporarily and be restored. Existing connections are not retested. Testing may take several minutes. Applying a suggestion is a separate action.",
+    hint: "One domain per line. Paste text to import; Steam+X opens the keyboard.", copied: "Copied", busy: "Working…",
+  },
+};
+export type Labels = typeof text.ru;
