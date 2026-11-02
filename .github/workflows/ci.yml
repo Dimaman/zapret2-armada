@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches: [main, feature/v0.1.0]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python source compilation
+        run: python -m compileall -q backend scripts
+      - name: Validate metadata
+        run: python -c 'import json; p=json.load(open("plugin.json")); assert p["api_version"]==1; assert json.load(open("package.json"))["version"]=="0.1.0"'
