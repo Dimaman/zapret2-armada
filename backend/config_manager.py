@@ -126,3 +126,28 @@ class ConfigManager:
 
     def restore(self):
         return validate(json.loads(self.backup.read_text()))
+
+
+def process_identity(pid=None):
+    pid = os.getpid() if pid is None else pid
+    stat = Path(f"/proc/{pid}/stat").read_text()
+    return {"pid": pid, "boot": Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
+            "start": stat.rsplit(")", 1)[1].split()[19]}
+
+
+def lease_alive(identity):
+    try:
+        return process_identity(identity["pid"]) == identity
+    except (OSError, KeyError, ValueError):
+        return False
+
+
+def recover_test(store):
+    journal = store.root / "autotune-recovery.json"
+    if journal.exists():
+        data = json.loads(journal.read_text())
+        if not lease_alive(data["owner"]):
+            store.save(data["original"])
+            journal.unlink()
+            return True
+    return False

@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import threading
 from .commands import run
-from .config_manager import ConfigManager, DEFAULT, atomic_write, domains, profile, validate
+from .config_manager import ConfigManager, DEFAULT, atomic_write, domains, profile, validate, process_identity, recover_test
 from .diagnostics import network, probe, system
 from .nftables_manager import NftablesManager, OWNER
 from .strategy_manager import check_engine, QUEUE
@@ -30,6 +30,11 @@ class ZapretManager:
         self.tune_result = None
         self.progress = ""
         self.error = ""
+        self.tune_thread = None
+
+    def recover(self):
+        if recover_test(self.config) and self.installed():
+            self._sync(self.config.load())
 
     def ctl(self, *args, check=True):
         return self.run(["/usr/bin/systemctl", *args, NAME], timeout=25, check=check)
@@ -114,7 +119,7 @@ class ZapretManager:
             # systemctl start for Type=simple alone is not readiness.
             import time
             for _ in range(100):
-                if self.status()["engine_running"]:
+                if self.status()["engine_running"] and self.nft.owned():
                     return
                 time.sleep(0.1)
             raise RuntimeError("Service started but nfqws2 listener did not become ready; inspect diagnostics/logs")
@@ -160,13 +165,21 @@ class ZapretManager:
     def autotune(self):
         with self.lock:
             old = self.config.load()
+            journal = self.root / "autotune-recovery.json"
             result = {"baseline": None, "candidates": [], "suggestion": None, "error": ""}
             try:
+                atomic_write(journal, json.dumps({"owner": process_identity(), "original": old}))
+                if self.cancel.is_set():
+                    raise RuntimeError("Testing cancelled")
+                def probe_runner(*args, **kwargs):
+                    if self.cancel.is_set():
+                        raise RuntimeError("Testing cancelled")
+                    return self.run(*args, **kwargs)
                 self.progress = "Baseline: DNS and HTTPS"
                 baseline_cfg = copy.deepcopy(old)
                 baseline_cfg["enabled"] = False
                 self.apply(baseline_cfg)
-                baseline = network(old["test_domains"], self.run)
+                baseline = network(old["test_domains"], probe_runner)
                 result["baseline"] = baseline
                 if not baseline["control"]["https"]:
                     raise RuntimeError("Control HTTPS failed. Resolve connectivity/DNS before testing strategies")
@@ -183,7 +196,7 @@ class ZapretManager:
                     candidate["domains"] = sorted(set(candidate["domains"] + ["www.youtube.com", "discord.com"] + old["test_domains"]))
                     try:
                         self.apply(candidate)
-                        test = network(old["test_domains"], self.run)
+                        test = network(old["test_domains"], probe_runner)
                         score = sum(t["https"] for t in test["targets"])
                         ms = sum(t["ms"] for t in test["targets"])
                         result["candidates"].append({"profile": p["id"], "score": score, "test": test})
@@ -198,6 +211,7 @@ class ZapretManager:
                 try:
                     self.apply(old)
                     self.config.remember(old)
+                    journal.unlink(missing_ok=True)
                 except Exception as e:
                     result["error"] += f" Restore failed: {e}"
                 self.tune_result = result
@@ -215,6 +229,8 @@ class ZapretManager:
         if self.tuning:
             raise RuntimeError("Strategy test in progress; wait or cancel")
         with self.lock:
+            if self.tuning:
+                raise RuntimeError("Strategy test in progress; wait or cancel")
             c = self.config.load()
             if operation == "install":
                 self.install()
@@ -261,7 +277,8 @@ class ZapretManager:
                 self.cancel.clear()
                 self.tune_result = None
                 self.tuning = True
-                threading.Thread(target=self.autotune, name="zapret2-strategy-test", daemon=True).start()
+                self.tune_thread = threading.Thread(target=self.autotune, name="zapret2-strategy-test", daemon=True)
+                self.tune_thread.start()
             elif operation == "apply_suggestion":
                 suggestion = self.tune_result and self.tune_result.get("suggestion")
                 if not suggestion or self.tune_result.get("error"):

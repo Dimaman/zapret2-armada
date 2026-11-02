@@ -12,7 +12,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backend.commands import ENV, run
-from backend.config_manager import ConfigManager
+from backend.config_manager import ConfigManager, recover_test
 from backend.nftables_manager import NftablesManager
 from backend.strategy_manager import QUEUE, check_engine
 
@@ -42,7 +42,9 @@ def supervise():
     log = logging.getLogger("engine")
     log.setLevel(logging.INFO)
     log.addHandler(handler)
-    config = ConfigManager(ROOT).load()
+    store = ConfigManager(ROOT)
+    recover_test(store)
+    config = store.load()
     nft = NftablesManager()
     child = None
 

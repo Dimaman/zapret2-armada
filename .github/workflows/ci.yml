@@ -64,7 +64,7 @@ jobs:
       - name: Build nfqws2 and exact-source libraries
         run: python scripts/build-engine.py
       - name: Architecture, runtime dependencies, Lua ABI and all profile dry-runs
-        run: python scripts/verify-engine.py ${{ matrix.arch }}
+        run: sudo /usr/bin/python3 scripts/verify-engine.py ${{ matrix.arch }}
       - name: Real NFQUEUE lifecycle and firewall isolation
         run: |
           sudo modprobe nf_conntrack

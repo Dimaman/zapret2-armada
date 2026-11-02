@@ -1,5 +1,6 @@
 """Construct nfqws2 arguments exclusively from validated structured profiles."""
 import struct
+import os
 from pathlib import Path
 from .config_manager import atomic_write, validate
 from .commands import run
@@ -19,6 +20,10 @@ def elf_machine(path):
 def arguments(app, state, c):
     c = validate(c)
     app, state = Path(app), Path(state)
+    # nfqws2 validates hostlists after dropping to nobody, including --dry-run.
+    # Only generated public hostlists live here; JSON configuration is 0600.
+    state.mkdir(parents=True, exist_ok=True)
+    os.chmod(state, 0o755)
     p = next(p for p in c["profiles"] if p["id"] == c["active"])
     if not c["domains"]:
         raise ValueError("At least one included domain required; refusing global interception")

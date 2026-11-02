@@ -222,7 +222,7 @@ class ManagerTests(unittest.TestCase):
             baseline={"control":{"https":True},"targets":[{"https":False,"ms":10}]}
             success={"control":{"https":True},"targets":[{"https":True,"ms":20}]}
             m.tuning=True
-            with patch("backend.zapret_manager.network",side_effect=[baseline,success,success,success]):m.autotune()
+            with patch("backend.zapret_manager.process_identity",return_value={"pid":1,"boot":"test","start":"0"}), patch("backend.zapret_manager.network",side_effect=[baseline,success,success,success]):m.autotune()
             self.assertEqual(m.config.load(),original)
             self.assertEqual(m.tune_result["suggestion"],"split-1")
             self.assertFalse(m.tuning)
@@ -233,7 +233,7 @@ class ManagerTests(unittest.TestCase):
             original=m.config.load()
             states=[]
             m.apply=lambda c:states.append(c)
-            with patch("backend.zapret_manager.network",return_value={"control":{"https":False}}):m.autotune()
+            with patch("backend.zapret_manager.process_identity",return_value={"pid":1,"boot":"test","start":"0"}), patch("backend.zapret_manager.network",return_value={"control":{"https":False}}):m.autotune()
             self.assertEqual(len(states),2)
             self.assertEqual(states[-1],original)
             self.assertIsNone(m.tune_result["suggestion"])
@@ -247,7 +247,7 @@ class ManagerTests(unittest.TestCase):
 
     def test_backend_entrypoint_error_envelope(self):
         main=importlib.import_module("main")
-        fake=SimpleNamespace(dispatch=lambda *a: (_ for _ in ()).throw(ValueError("bad input")),error="")
+        fake=SimpleNamespace(dispatch=lambda *a: (_ for _ in ()).throw(ValueError("bad input")),error="",recover=lambda:None)
         async def smoke():
             p=main.Plugin()
             with patch.object(main,"ZapretManager",return_value=fake):await p._main()

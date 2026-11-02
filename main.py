@@ -12,6 +12,7 @@ from backend.zapret_manager import ZapretManager
 class Plugin:
     async def _main(self):
         self.manager = ZapretManager(PLUGIN)
+        await asyncio.to_thread(self.manager.recover)
 
     async def request(self, operation, payload):
         try:
@@ -24,9 +25,13 @@ class Plugin:
     async def _unload(self):
         # The system service remains under the user's explicit enabled choice.
         self.manager.cancel.set()
+        if self.manager.tune_thread:
+            await asyncio.to_thread(self.manager.tune_thread.join)
 
     async def _uninstall(self):
         self.manager.cancel.set()
+        if self.manager.tune_thread:
+            await asyncio.to_thread(self.manager.tune_thread.join)
         # Wait until test worker has restored the saved state before uninstall.
         await asyncio.to_thread(self._remove)
 
