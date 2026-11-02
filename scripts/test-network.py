@@ -13,7 +13,7 @@ from backend.commands import run
 from backend.config_manager import DEFAULT
 from backend.nftables_manager import NftablesManager, NFT
 from backend.service import queue_ready
-from backend.strategy_manager import check_engine
+from backend.strategy_manager import check_engine, copy_runtime
 
 assert Path('/proc/self/ns/net').readlink() != Path('/proc/1/ns/net').readlink(), 'Refusing host namespace'
 root=Path(__file__).resolve().parents[1]
@@ -26,8 +26,10 @@ nft=NftablesManager()
 child=None
 try:
  with tempfile.TemporaryDirectory() as d:
+  Path(d).chmod(0o755)
+  app=Path(d)/'app';copy_runtime(root,app)
   c=copy.deepcopy(DEFAULT)
-  args=check_engine(root,d,c)
+  args=check_engine(app,Path(d)/'state',c)
   child=subprocess.Popen(args,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
   for _ in range(100):
    if queue_ready(child.pid):break

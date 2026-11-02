@@ -1,12 +1,26 @@
 """Construct nfqws2 arguments exclusively from validated structured profiles."""
 import struct
 import os
+import shutil
 from pathlib import Path
 from .config_manager import atomic_write, validate
 from .commands import run
 
 QUEUE = 20073
 MARK = "0x40000000"
+
+
+def copy_runtime(source, target):
+    source, target = Path(source), Path(target)
+    target.mkdir(mode=0o755)
+    target.chmod(0o755)
+    for name in ("backend", "bin", "lua", "files"):
+        src = source / name
+        if src.is_symlink() or any(p.is_symlink() for p in src.rglob("*")):
+            raise RuntimeError("Symlinks in runtime payload are forbidden")
+        shutil.copytree(src, target / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    for path in target.rglob("*"):
+        path.chmod(0o755 if path.is_dir() or path.name == "nfqws2" else 0o644)
 
 
 def elf_machine(path):

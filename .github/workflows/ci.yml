@@ -71,6 +71,8 @@ jobs:
           sudo modprobe nfnetlink_queue
           sudo modprobe nft_queue
           sudo unshare --net /usr/bin/python3 scripts/test-network.py
+      - name: Actual hardened systemd service lifecycle in isolated namespace
+        run: sudo /usr/bin/python3 scripts/test-systemd.py
       - name: Archive engine, licenses and corresponding sources
         run: tar -czf runtime-${{ matrix.arch }}.tar.gz bin lua files build/licenses .cache/sources
       - uses: actions/upload-artifact@v4

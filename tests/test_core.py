@@ -17,6 +17,22 @@ from backend.zapret_manager import ZapretManager
 
 
 class ConfigTests(unittest.TestCase):
+    def test_interrupted_test_recovered_only_after_owner_dies(self):
+        from backend.config_manager import recover_test
+        with tempfile.TemporaryDirectory() as d:
+            m=ConfigManager(d)
+            original=m.load()
+            m.save({**original,"active":"split-2"})
+            journal=Path(d)/"autotune-recovery.json"
+            journal.write_text(json.dumps({"owner":{"pid":1},"original":original}))
+            with patch("backend.config_manager.lease_alive",return_value=True):
+                self.assertFalse(recover_test(m))
+                self.assertEqual(m.load()["active"],"split-2")
+            with patch("backend.config_manager.lease_alive",return_value=False):
+                self.assertTrue(recover_test(m))
+                self.assertEqual(m.load(),original)
+                self.assertFalse(journal.exists())
+
     def test_roundtrip_and_backup(self):
         with tempfile.TemporaryDirectory() as d:
             m = ConfigManager(d)

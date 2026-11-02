@@ -10,7 +10,7 @@ from .commands import run
 from .config_manager import ConfigManager, DEFAULT, atomic_write, domains, profile, validate, process_identity, recover_test
 from .diagnostics import network, probe, system
 from .nftables_manager import NftablesManager, OWNER
-from .strategy_manager import check_engine, QUEUE
+from .strategy_manager import check_engine, copy_runtime, QUEUE
 
 ROOT = Path("/var/lib/zapret2-armada")
 LOG = Path("/var/log/zapret2-armada")
@@ -72,19 +72,16 @@ class ZapretManager:
             self.run(["/usr/sbin/modprobe", module])
         self.run(["/usr/sbin/nft", "--version"])
         self.plugin.joinpath("bin/nfqws2").chmod(0o755)
-        with tempfile.TemporaryDirectory(dir=self.root) as tmp:
-            check_engine(self.plugin, tmp, self.config.load(), self.run)
         LOG.mkdir(parents=True, exist_ok=True, mode=0o750)
         stage = self.root / "app.new"
         if stage.exists():
             shutil.rmtree(stage)
-        stage.mkdir(mode=0o755)
+        previous = {p: p.read_text() if p.exists() else None for p in (UNIT, MODULES)}
+        replaced = False
         try:
-            for name in ("backend", "bin", "lua", "files"):
-                src = self.plugin / name
-                if src.is_symlink() or any(p.is_symlink() for p in src.rglob("*")):
-                    raise RuntimeError("Symlinks in runtime payload are forbidden")
-                shutil.copytree(src, stage / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            copy_runtime(self.plugin, stage)
+            with tempfile.TemporaryDirectory(dir=self.root) as tmp:
+                check_engine(stage, tmp, self.config.load(), self.run)
             self.ctl("stop", check=False)
             old = self.root / "app.old"
             if old.exists():
@@ -93,6 +90,7 @@ class ZapretManager:
             if app.exists():
                 app.rename(old)
             stage.rename(app)
+            replaced = True
             atomic_write(UNIT, (self.plugin / "configs/zapret2-armada.service").read_text(), 0o644)
             atomic_write(MODULES, "# " + OWNER + "\nnf_conntrack\nnfnetlink_queue\nnft_queue\n", 0o644)
             self.run(["/usr/bin/systemctl", "daemon-reload"])
@@ -100,12 +98,21 @@ class ZapretManager:
         except Exception:
             # Restore the previous runtime on an interrupted/failed upgrade.
             old = self.root / "app.old"
-            if old.exists():
+            if replaced:
+                self.ctl("stop", check=False)
                 app = self.root / "app"
                 if app.exists():
                     shutil.rmtree(app)
-                old.rename(app)
-                self._sync(self.config.load())
+                if old.exists():
+                    old.rename(app)
+                for path, content in previous.items():
+                    if content is None:
+                        path.unlink(missing_ok=True)
+                    else:
+                        atomic_write(path, content, 0o644)
+                self.run(["/usr/bin/systemctl", "daemon-reload"])
+                if self.installed():
+                    self._sync(self.config.load())
             raise
         finally:
             if stage.exists():
