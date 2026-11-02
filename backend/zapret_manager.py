@@ -127,7 +127,7 @@ class ZapretManager:
     def _sync(self, c):
         self.ctl("enable" if c["autostart"] else "disable")
         if c["enabled"]:
-            self.ctl("reset-failed")
+            self.ctl("reset-failed", check=False)
             self.ctl("restart")
             # systemctl start for Type=simple alone is not readiness.
             import time
