@@ -4,6 +4,7 @@ on:
     branches: [main, feature/v0.1.0]
   pull_request:
     branches: [main]
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -14,7 +15,91 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Python source compilation
-        run: python -m compileall -q backend scripts
-      - name: Validate metadata
-        run: python -c 'import json; p=json.load(open("plugin.json")); assert p["api_version"]==1; assert json.load(open("package.json"))["version"]=="0.1.0"'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript, frontend, Python and unit tests
+        run: |
+          npm run typecheck
+          npm run build
+          python -m compileall -q backend main.py scripts
+          python -m unittest discover -s tests -v
+          python scripts/validate-project.py
+          bash -n scripts/*.sh
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
+      - name: Frontend bundled dependency notices
+        run: |
+          mkdir -p build/frontend-licenses
+          cp node_modules/@decky/api/LICENSE build/frontend-licenses/decky-api-LICENSE
+          cp node_modules/tslib/LICENSE.txt build/frontend-licenses/tslib-LICENSE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend
+          path: |
+            dist/index.js
+            build/frontend-licenses
+          if-no-files-found: error
+  engine:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+          - runner: ubuntu-24.04
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Native build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential pkg-config libcap-dev nftables iproute2 kmod
+      - name: Build nfqws2 and exact-source libraries
+        run: python scripts/build-engine.py
+      - name: Architecture, runtime dependencies, Lua ABI and all profile dry-runs
+        run: python scripts/verify-engine.py ${{ matrix.arch }}
+      - name: Real NFQUEUE lifecycle and firewall isolation
+        run: |
+          sudo modprobe nf_conntrack
+          sudo modprobe nfnetlink_queue
+          sudo modprobe nft_queue
+          sudo unshare --net /usr/bin/python3 scripts/test-network.py
+      - name: Archive engine, licenses and corresponding sources
+        run: tar -czf runtime-${{ matrix.arch }}.tar.gz bin lua files build/licenses .cache/sources
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-${{ matrix.arch }}
+          path: runtime-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
+  package:
+    needs: [source, engine]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend
+      - uses: actions/download-artifact@v4
+        with:
+          name: engine-arm64
+      - run: |
+          tar -xzf runtime-arm64.tar.gz
+          cp -r build/frontend-licenses build/licenses/frontend
+          python scripts/package.py
+          cd release
+          sha256sum --check SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zapret2-armada-v0.1.0-release
+          path: release/*
+          if-no-files-found: error
