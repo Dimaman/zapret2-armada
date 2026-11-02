@@ -1,0 +1,37 @@
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    tags: [v0.1.0]
+permissions:
+  contents: read
+jobs:
+  validate:
+    uses: ./.github/workflows/ci.yml
+  stage:
+    needs: validate
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: zapret2-armada-v0.1.0-release
+          path: release
+      - name: Validate checksums and attach to existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd release
+          sha256sum --check SHA256SUMS
+          cd ..
+          python scripts/package.py release/zapret2-armada-v0.1.0-arm64.zip
+          gh release view v0.1.0 --repo "$GITHUB_REPOSITORY"
+          gh release upload v0.1.0 release/* --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit v0.1.0 --title 'Zapret2 Armada 0.1.0' --prerelease --notes-file docs/RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
+      - name: Publish only for a successfully tested tag
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit v0.1.0 --draft=false --prerelease --repo "$GITHUB_REPOSITORY"

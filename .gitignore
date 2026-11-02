@@ -1,0 +1,12 @@
+node_modules/
+dist/
+bin/
+.cache/
+build/
+release/
+lua/
+files/
+runtime-*.tar.gz
+__pycache__/
+*.pyc
+.pytest_cache/
