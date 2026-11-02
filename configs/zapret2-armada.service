@@ -1,0 +1,35 @@
+# zapret2-armada-managed-v1
+[Unit]
+Description=Zapret2 Armada native nfqws2 supervisor
+After=network.target systemd-modules-load.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -B /var/lib/zapret2-armada/app/backend/service.py
+ExecStopPost=/usr/bin/python3 -B /var/lib/zapret2-armada/app/backend/cleanup.py
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=12
+KillMode=control-group
+UMask=0022
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_PACKET
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_SETUID CAP_SETGID
+ReadWritePaths=/var/lib/zapret2-armada /var/log/zapret2-armada
+Nice=10
+CPUWeight=20
+MemoryMax=128M
+TasksMax=32
+LimitNOFILE=256
+
+[Install]
+WantedBy=multi-user.target
