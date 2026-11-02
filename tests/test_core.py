@@ -208,6 +208,15 @@ class ProbeTests(unittest.TestCase):
 
 
 class ManagerTests(unittest.TestCase):
+    def test_reset_recovers_corrupt_configuration(self):
+        with tempfile.TemporaryDirectory() as d:
+            m=ZapretManager(d,d)
+            m.config.path.write_text('{broken JSON')
+            self.assertIn('Invalid configuration',m.status()['error'])
+            m.dispatch('reset',{})
+            self.assertEqual(m.config.load(),validate(DEFAULT))
+            self.assertEqual((Path(d)/'config.invalid.json').read_text(),'{broken JSON')
+
     def test_failed_apply_rolls_back_persistent_and_service_state(self):
         with tempfile.TemporaryDirectory() as d:
             m=ZapretManager(d,d)

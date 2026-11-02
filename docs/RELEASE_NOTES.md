@@ -30,6 +30,8 @@ plugin support. The immutable Fedora bootc image is not modified.
   configuration or foreign firewall tables are changed.
 - No remote domain-list downloads, unrestricted Lua import or desktop tray.
   A maintained seed domain list is included in this version.
+- Hard termination of Decky during the stopped baseline may delay restoration
+  until backend reload or reboot; traffic remains fail-open.
 - Testing temporarily restarts the engine. Use fresh connections. Diagnostic
   exports contain your domain configuration and system information.
 - x86_64 engine is tested as preparation for Steam Deck; this release packages ARM64 only.

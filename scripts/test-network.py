@@ -22,6 +22,7 @@ run(['/usr/sbin/ip','link','set','wlan-test','up'])
 run(['/usr/sbin/ip','address','add','198.51.100.1/24','dev','wlan-test'])
 run(['/usr/sbin/ip','route','add','1.1.1.1/32','dev','wlan-test'])
 run([NFT,'add','table','inet','foreign_sentinel'])
+run([NFT,'--file','-'],text='add chain inet foreign_sentinel downstream { type filter hook output priority -149; policy accept; }\nadd rule inet foreign_sentinel downstream udp dport 443 counter\n')
 nft=NftablesManager()
 child=None
 try:
@@ -40,12 +41,15 @@ try:
   nft.apply(True)
   child.terminate();child.wait(timeout=5)
   assert not queue_ready(child.pid)
-  # No listener: a packet must continue to the next rule because of bypass.
-  run([NFT,'add','rule','inet','zapret2_armada','output','counter','comment','bypass-probe'])
+  # NF_ACCEPT from a bypassed queue continues to the next BASE chain, not
+  # to the next rule in the current chain. Measure the downstream hook.
   with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as s:s.sendto(b'probe',('1.1.1.1',443))
   data=json.loads(run([NFT,'-j','list','chain','inet','zapret2_armada','output']).stdout)
   counters=[e['counter']['packets'] for x in data['nftables'] for e in x.get('rule',{}).get('expr',[]) if 'counter'in e]
-  assert counters and counters[-1]>=1,'Bypass did not continue packet processing'
+  assert counters and counters[-1]>=1,'Probe did not match the real UDP queue rule'
+  downstream=json.loads(run([NFT,'-j','list','chain','inet','foreign_sentinel','downstream']).stdout)
+  passed=[e['counter']['packets'] for x in downstream['nftables'] for e in x.get('rule',{}).get('expr',[]) if 'counter'in e]
+  assert passed and passed[0]>=1,'Bypass did not continue to the downstream firewall hook'
 finally:
  nft.remove()
  if child and child.poll() is None:child.terminate();child.wait(timeout=5)

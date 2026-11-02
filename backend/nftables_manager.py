@@ -13,7 +13,7 @@ def rules(udp=False, existing=False):
     # Marked policy-routed traffic and non-WiFi (including VPN tunnel devices)
     # are excluded, as are LAN/link-local/multicast/reserved destinations.
     prefix = f"delete table inet {TABLE}\n" if existing else ""
-    udp_rule = f"udp dport 443 ct original packets 1-3 queue num {QUEUE} bypass" if udp else ""
+    udp_rule = f"udp dport 443 ct original packets 1-3 counter queue num {QUEUE} bypass" if udp else ""
     return prefix + f'''add table inet {TABLE} {{
  comment "{OWNER}"
  chain output {{
@@ -22,7 +22,7 @@ def rules(udp=False, existing=False):
   oifname != "wl*" return
   ip daddr {{ 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 240.0.0.0/4 }} return
   ip6 daddr {{ ::/128, ::1/128, fc00::/7, fe80::/10, ff00::/8 }} return
-  tcp dport {{ 80, 443 }} ct original packets 1-12 queue num {QUEUE} bypass
+  tcp dport {{ 80, 443 }} ct original packets 1-12 counter queue num {QUEUE} bypass
   {udp_rule}
  }}
 }}

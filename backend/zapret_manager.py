@@ -46,7 +46,12 @@ class ZapretManager:
         return self.ctl("is-active", check=False).stdout.strip() == "active"
 
     def status(self):
-        c = self.config.load()
+        configuration_error = ""
+        try:
+            c = self.config.load()
+        except Exception as e:
+            c = copy.deepcopy(DEFAULT)
+            configuration_error = f"Invalid configuration; use Reset or Restore: {e}"
         try:
             active = self.active() if self.installed() else False
         except Exception:
@@ -59,7 +64,7 @@ class ZapretManager:
         version = json.loads(info.read_text()) if info.exists() else {"version": "not built"}
         return {"config": c, "installed": self.installed(), "service_active": active, "engine_running": engine,
                 "plugin_version": "0.1.0", "engine_version": version["version"],
-                "os": Path("/etc/os-release").read_text(), "error": self.error,
+                "os": Path("/etc/os-release").read_text(), "error": configuration_error or self.error,
                 "tuning": self.tuning, "progress": self.progress, "tune_result": self.tune_result}
 
     def install(self):
@@ -89,6 +94,7 @@ class ZapretManager:
             app = self.root / "app"
             if app.exists():
                 app.rename(old)
+                replaced = True
             stage.rename(app)
             replaced = True
             atomic_write(UNIT, (self.plugin / "configs/zapret2-armada.service").read_text(), 0o644)
@@ -238,7 +244,14 @@ class ZapretManager:
         with self.lock:
             if self.tuning:
                 raise RuntimeError("Strategy test in progress; wait or cancel")
-            c = self.config.load()
+            try:
+                c = self.config.load()
+            except Exception:
+                if operation not in {"reset", "restore", "recover_firewall"}:
+                    raise
+                atomic_write(self.root / "config.invalid.json", self.config.path.read_text()[:1_000_000])
+                c = copy.deepcopy(DEFAULT)
+                self.config.save(c)
             if operation == "install":
                 self.install()
             elif operation == "configure":
