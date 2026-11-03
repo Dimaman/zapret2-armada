@@ -10,6 +10,7 @@ from .commands import run
 from .config_manager import ConfigManager, DEFAULT, atomic_write, domains, profile, validate, process_identity, recover_test
 from .diagnostics import network, probe, system
 from .domain_sources import update as remote_domains
+from .kernel_modules import REQUIRED, ensure_module
 from .nftables_manager import NftablesManager, OWNER
 from .strategy_manager import check_engine, copy_runtime, QUEUE
 
@@ -74,8 +75,8 @@ class ZapretManager:
         for path in (UNIT, MODULES):
             if path.exists() and not path.read_text().startswith("# " + OWNER):
                 raise RuntimeError(f"Refusing to overwrite foreign file: {path}")
-        for module in ("nf_conntrack", "nfnetlink_queue", "nft_queue"):
-            self.run(["/usr/sbin/modprobe", module])
+        for module in REQUIRED:
+            ensure_module(module, self.run)
         self.run(["/usr/sbin/nft", "--version"])
         self.plugin.joinpath("bin/nfqws2").chmod(0o755)
         LOG.mkdir(parents=True, exist_ok=True, mode=0o750)

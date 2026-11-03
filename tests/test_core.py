@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from backend.config_manager import ConfigManager, DEFAULT, atomic_write, domain, domains, profile, validate
 from backend.diagnostics import probe
+from backend.kernel_modules import ensure_module, inspect_module
 from backend.nftables_manager import NftablesManager, OWNER, rules
 from backend.strategy_manager import arguments, elf_machine
 from backend.zapret_manager import ZapretManager
@@ -224,6 +225,26 @@ class ProbeTests(unittest.TestCase):
 
 
 class ManagerTests(unittest.TestCase):
+    def test_loaded_kernel_dependency_skips_modprobe_with_missing_module_index(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "nf_conntrack").mkdir()
+            def fail_if_called(*args, **kwargs):
+                raise AssertionError("modprobe must not be called for an already present module")
+            self.assertIn("present", ensure_module("nf_conntrack", fail_if_called, Path(d)))
+            self.assertIn("present", inspect_module("nf_conntrack", fail_if_called, Path(d)))
+
+    def test_unavailable_dependency_still_blocks_install(self):
+        with tempfile.TemporaryDirectory() as d:
+            calls = []
+            def missing(args, **kwargs):
+                calls.append(args)
+                return SimpleNamespace(returncode=1, stdout="", stderr="Module nf_conntrack not found")
+            with self.assertRaisesRegex(RuntimeError, "nf_conntrack is unavailable"):
+                ensure_module("nf_conntrack", missing, Path(d))
+            self.assertEqual(calls, [["/usr/sbin/modprobe", "nf_conntrack"]])
+            with self.assertRaises(ValueError):
+                ensure_module("untrusted", missing, Path(d))
+
     def test_reset_recovers_corrupt_configuration(self):
         with tempfile.TemporaryDirectory() as d:
             m=ZapretManager(d,d)

@@ -1,7 +1,7 @@
 export const text = {
   ru: {
     dashboard: "Главная", strategies: "Стратегии", domains: "Домены", diagnostics: "Диагностика", settings: "Настройки",
-    section: "Раздел", enable: "Zapret2 включён", active: "Работает", inactive: "Остановлен", refresh: "Обновить состояние",
+    section: "Раздел", enable: "Запустить Zapret2", startPending: "Запуск запрошен, но движок остановлен. Открой диагностику.", active: "Работает", inactive: "Остановлен", refresh: "Обновить состояние",
     restart: "Перезапустить", strategy: "Стратегия", udp: "Обработка QUIC / UDP 443", udpInfo: "Выключено по умолчанию. Голос Discord и игровой UDP не перехватываются.",
     auto: "Автозапуск с системой", diagnose: "Проверить систему и соединение", logs: "Показать логи", reset: "Сбросить настройки",
     recover: "Остановить и убрать свои правила", restore: "Восстановить прошлую конфигурацию", install: "Подготовить / обновить службу",
@@ -16,7 +16,7 @@ export const text = {
   },
   en: {
     dashboard: "Dashboard", strategies: "Strategies", domains: "Domains", diagnostics: "Diagnostics", settings: "Settings",
-    section: "Section", enable: "Enable Zapret2", active: "Running", inactive: "Stopped", refresh: "Refresh status",
+    section: "Section", enable: "Start Zapret2", startPending: "Start requested, but the engine is stopped. Open Diagnostics.", active: "Running", inactive: "Stopped", refresh: "Refresh status",
     restart: "Restart", strategy: "Strategy", udp: "Process QUIC / UDP 443", udpInfo: "Off by default. Discord voice and game UDP are excluded.",
     auto: "Start with system", diagnose: "Check system and connectivity", logs: "View logs", reset: "Reset configuration",
     recover: "Stop and remove owned rules", restore: "Restore previous configuration", install: "Prepare / update service",
