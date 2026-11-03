@@ -1,28 +1,28 @@
-# Hysteria2 Armada
+# SpoofDPI Armada
 
-Decky Loader plugin for Armada OS handhelds. One compact switch in Steam Game
-Mode starts or stops an official ARM64 Hysteria2 client in TUN mode. TCP and UDP
-from local applications are routed through the configured Hysteria2 server.
-No NFQUEUE, nf_conntrack, Zapret2 engine, or remote control port is needed.
-The Hysteria2 project notes that its TUN mode does not tunnel ICMP.
+Decky Loader plugin for ARM64 Armada OS handhelds. The compact Game Mode panel
+has two mutually exclusive switches:
 
-The plugin is an experimental update of Zapret2 Armada. It uses the same
-Decky ZIP root directory, so Decky replaces the old entry. On first activation
-it disables only the old owned service and removes its owned nftables table.
-The previous domain settings remain on disk but are not used by this VPN.
+- Local DPI bypass: SpoofDPI v1.5.5 in system-wide IPv4 TUN mode. Connections
+  leave the handheld directly, with no VPS. TCP TLS ClientHello is split and
+  optional fake packets are sent. UDP is forwarded without fake packets by
+  default to avoid interfering with games.
+- Hysteria2 VPN: the existing full TCP/UDP tunnel through your server.
 
-Configure the server address, UDP port, authentication password, optional
-Salamander obfuscation password, and TLS SNI through the plugin settings.
-Credentials are stored as root-only files under /var/lib/hysteria2-armada,
-never included in status RPC. TLS verification is on by default.
-The server IP is resolved before installing the TUN default routes and is
-excluded from those routes to avoid a connection loop. IPv4 and IPv6 default
-routes are installed by the official Hysteria2 client while connected.
+Both modes need `/dev/net/tun` and Decky root access. SpoofDPI does not use
+NFQUEUE or `nf_conntrack`. The upstream TUN implementation is experimental,
+currently handles IPv4 packets, and depends on Linux routing and permissions.
+IPv6 is not intercepted by its TUN implementation. No DPI method can guarantee
+unblocking every site or game: effectiveness depends on the network and server.
 
-The official Hysteria2 v2.13.0 ARM64 release is pinned by SHA256 at build time.
-Sources and complete release checksums accompany the installable ZIP.
+On/off operations manage only this plugin's owned systemd services. Switching
+modes stops the old service before starting the other and rolls back on failure.
+Autostart is disabled for local DPI; optional VPN autostart remains as configured.
+Secrets for Hysteria2 remain in root-only files. The ZIP root remains
+`zapret2-armada/` so Decky replaces the previous plugin entry, while its
+visible name and the release artifacts are SpoofDPI Armada.
+
 See [installation](docs/INSTALL_RU.md) and [release notes](docs/RELEASE_NOTES.md).
-
-Device-specific operation on an Odin 3 kernel 6.11.0 remains unverified.
-GitHub CI checks syntax, schema, release digest, ELF architecture, and the
-packaged ZIP; it does not stand in for a real device connection.
+GitHub CI checks frontend, lifecycle, upstream ARM64 binary execution, systemd
+units and installable ZIP. The Odin 3 hardware network path must still be tested
+on the device.

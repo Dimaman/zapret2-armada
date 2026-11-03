@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Rename the Decky project to SpoofDPI Armada and add local system-wide IPv4
+  TUN DPI bypass without NFQUEUE or VPS routing.
+- Keep Hysteria2 as a mutually exclusive full VPN option; preserve the
+  existing Decky installation directory and VPN settings on upgrade.
+- Add bounded TLS profiles, owned systemd lifecycle, ARM64 release pin,
+  checksums, licensing and service-switch rollback.
+
 ## 0.2.0
 
 - Replace the local Zapret2/NFQUEUE startup path with the official Hysteria2

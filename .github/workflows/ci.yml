@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main, feature/hysteria2-tun]
+    branches: [main, feature/spoofdpi-armada]
   pull_request:
     branches: [main]
   workflow_call:
@@ -20,16 +20,16 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Frontend, schema, lifecycle and packaging checks
+      - name: Frontend, lifecycle and package checks
         run: |
           npm run typecheck
           npm run build
-          python -m compileall -q vpn backend main.py scripts
-          python -m unittest tests.test_vpn -v
+          python -m compileall -q dpi vpn backend main.py scripts
+          python -m unittest tests.test_vpn tests.test_dpi -v
           python scripts/validate-project.py
           bash -n scripts/uninstall.sh
       - run: npm audit --omit=dev --audit-level=high
-      - name: Frontend dependency notices
+      - name: Frontend license notices
         run: |
           mkdir -p build/frontend-licenses
           cp node_modules/@decky/api/LICENSE build/frontend-licenses/decky-api-LICENSE
@@ -48,18 +48,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fetch pinned upstream ARM64 executable and license
-        run: python scripts/build_hysteria.py
-      - name: Verify executable runs on ARM64
+      - name: Fetch pinned ARM64 executables and licenses
+        run: |
+          python scripts/build_hysteria.py
+          python scripts/build_spoofdpi.py
+      - name: Verify executables and systemd units on ARM64
         run: |
           test "$(uname -m)" = aarch64
           bin/hysteria version
+          bin/spoofdpi --version
+          sudo mkdir -p /var/lib/spoofdpi-armada/app /var/lib/hysteria2-armada/app
+          sudo install -m755 bin/spoofdpi /var/lib/spoofdpi-armada/app/spoofdpi
+          sudo install -m755 bin/hysteria /var/lib/hysteria2-armada/app/hysteria
+          systemd-analyze verify configs/spoofdpi-armada.service configs/hysteria2-armada.service
       - uses: actions/upload-artifact@v4
         with:
           name: runtime-arm64
           path: |
             bin/hysteria
+            bin/spoofdpi
             HYSTERIA_LICENSE.md
+            SPOOFDPI_LICENSE
           if-no-files-found: error
   package:
     needs: [source, runtime]
@@ -82,6 +91,6 @@ jobs:
           sha256sum --check SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: hysteria2-armada-v0.2.0-release
+          name: spoofdpi-armada-v0.3.0-release
           path: release/*
           if-no-files-found: error

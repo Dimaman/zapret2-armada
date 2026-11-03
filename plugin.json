@@ -1,1 +1,1 @@
-{"name":"Hysteria2 Armada","author":"Dimaman","flags":["root"],"api_version":1,"publish":{"tags":["network","arm64","vpn"],"description":"Full-device Hysteria2 TUN VPN for Armada OS"}}
+{"name":"SpoofDPI Armada","author":"Dimaman","flags":["root"],"api_version":1,"publish":{"tags":["network","arm64","dpi","vpn"],"description":"Local DPI bypass and optional Hysteria2 VPN for Armada OS"}}
