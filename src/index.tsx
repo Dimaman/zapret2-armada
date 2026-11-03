@@ -76,7 +76,7 @@ function Content() {
   return <PanelSection>
     <PanelSectionRow><ToggleField
       label="Hysteria2 VPN"
-      description={status?.active ? "Подключено через TUN" : status?.config.enabled ? "Соединение запускается…" : "Выключено"}
+      description={status?.active ? "Подключено через TUN" : busy ? "Подключение…" : status?.config.enabled ? "Нет соединения — откройте логи" : "Выключено"}
       checked={!!status?.config.enabled}
       disabled={busy || !status?.config.configured}
       onChange={enabled => { void change("set_enabled",{enabled}).catch(() => {}); }}

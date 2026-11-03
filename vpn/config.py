@@ -15,7 +15,7 @@ DEFAULT = {
 
 
 def validate(value):
-    if not isinstance(value, dict) or set(value) != set(DEFAULT) or value["schema"] != 1:
+    if not isinstance(value, dict) or set(value) != set(DEFAULT) or type(value["schema"]) is not int or value["schema"] != 1:
         raise ValueError("Unsupported VPN configuration")
     c = copy.deepcopy(value)
     for key in ("enabled", "autostart", "insecure"):

@@ -12,6 +12,10 @@ from vpn.manager import Manager
 class Plugin:
     async def _main(self):
         self.manager = Manager(PLUGIN)
+        try:
+            await asyncio.to_thread(self.manager.retire_old_service)
+        except Exception as e:
+            self.manager.error = str(e)
 
     async def request(self, operation, payload):
         try:
