@@ -22,9 +22,10 @@ def main():
     ip("route", "add", "default", "via", "10.237.11.1", "dev", "di-v0")
     with tempfile.TemporaryDirectory() as tmp:
         conf = Path(tmp) / "config.toml"
-        conf.write_text('[app]\nmode = "tun"\nno-tui = true\n[https]\nsplit-mode = "sni"\n')
+        conf.write_text('[app]\nmode = "tun"\nauto-configure-network = true\nno-tui = true\n[https]\nsplit-mode = "sni"\n')
         proc = subprocess.Popen([str(ROOT / "bin/spoofdpi"), "--config", str(conf)],
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        output = ""
         try:
             for _ in range(100):
                 if proc.poll() is not None:
@@ -37,10 +38,11 @@ def main():
         finally:
             proc.terminate()
             try:
-                proc.communicate(timeout=10)
+                output, _ = proc.communicate(timeout=10)
             except subprocess.TimeoutExpired:
                 proc.kill()
-                proc.communicate(timeout=5)
+                output, _ = proc.communicate(timeout=5)
+            print(output[-3000:])
         if "tun-spoofdpi" in ip("route", "show") or "tun-spoofdpi" in ip("link", "show"):
             raise RuntimeError("SpoofDPI routes or interface remain after stop")
         if "lookup 200" in ip("rule", "show"):

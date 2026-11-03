@@ -11,6 +11,7 @@ from main import Plugin
 class DpiTests(unittest.TestCase):
     def test_profiles_and_reject_bad_settings(self):
         self.assertIn('mode = "tun"', config("sni"))
+        self.assertIn('auto-configure-network = true', config("sni"))
         self.assertIn('fake-count = 0', config("strong").split("[udp]")[1])
         with self.assertRaises(ValueError):
             validate({**DEFAULT, "profile": "--exec"})
@@ -23,6 +24,8 @@ class DpiTests(unittest.TestCase):
             calls = []
             def runner(argv, **kwargs):
                 calls.append(argv)
+                if argv[0] == "/usr/sbin/ip":
+                    return SimpleNamespace(stdout="0.0.0.0/1 dev tun-spoofdpi\n" if tun.exists() else "", returncode=0)
                 return SimpleNamespace(stdout="active" if tun.exists() else "inactive", returncode=0)
             manager = DpiManager(d, root=root, unit=unit, tun=tun, runner=runner)
             def install():

@@ -34,7 +34,7 @@ def config(profile):
         https = 'split-mode = "sni"\nfake-count = 2\n'
     else:
         https = 'split-mode = "chunk"\nchunk-size = 1\ndisorder = true\nfake-count = 5\n'
-    return '[app]\nmode = "tun"\nno-tui = true\nlog-level = "info"\n\n[https]\n' + https + '\n[udp]\nfake-count = 0\n'
+    return '[app]\nmode = "tun"\nauto-configure-network = true\nno-tui = true\nlog-level = "info"\n\n[https]\n' + https + '\n[udp]\nfake-count = 0\n'
 
 
 class DpiManager:
@@ -62,7 +62,13 @@ class DpiManager:
         return self.unit.exists() and self.unit.read_text().startswith(OWNER)
 
     def active(self):
-        return self.installed() and self.ctl("is-active", check=False).stdout.strip() == "active" and self.tun.exists()
+        if not (self.installed() and self.ctl("is-active", check=False).stdout.strip() == "active" and self.tun.exists()):
+            return False
+        for prefix in ("0.0.0.0/1", "128.0.0.0/1"):
+            r = self.run(["/usr/sbin/ip", "-4", "route", "show", prefix], check=False)
+            if r.returncode or "dev tun-spoofdpi" not in r.stdout:
+                return False
+        return True
 
     def status(self):
         return {**self.load(), "active": self.active(), "error": self.error}
