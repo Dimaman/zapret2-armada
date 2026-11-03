@@ -61,6 +61,11 @@ jobs:
           sudo install -m755 bin/spoofdpi /var/lib/spoofdpi-armada/app/spoofdpi
           sudo install -m755 bin/hysteria /var/lib/hysteria2-armada/app/hysteria
           systemd-analyze verify configs/spoofdpi-armada.service configs/hysteria2-armada.service
+      - name: Real SpoofDPI TUN lifecycle in isolated network namespace
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y iproute2
+          sudo unshare --net /usr/bin/python3 scripts/test_dpi_tun.py
       - uses: actions/upload-artifact@v4
         with:
           name: runtime-arm64

@@ -67,7 +67,7 @@ def package():
                "build/frontend-licenses", "scripts/uninstall.sh"]
     source = ["plugin.json", "main.py", "vpn", "dpi", "backend/commands.py", "backend/config_manager.py",
               "backend/__init__.py", "configs/hysteria2-armada.service", "configs/spoofdpi-armada.service", "src/index.tsx",
-              "src/api.ts", "scripts/build_hysteria.py", "scripts/build_spoofdpi.py", "scripts/package.py",
+              "src/api.ts", "scripts/build_hysteria.py", "scripts/build_spoofdpi.py", "scripts/test_dpi_tun.py", "scripts/package.py",
               "scripts/validate-project.py", "scripts/uninstall.sh", "tests/test_vpn.py", "tests/test_dpi.py",
               ".github/workflows/ci.yml", ".github/workflows/release.yml",
               "package.json", "package-lock.json", "rollup.config.js", "tsconfig.json",
