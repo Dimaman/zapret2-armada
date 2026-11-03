@@ -1,4 +1,4 @@
-"""Decky API v1 entry point. No shell or arbitrary command RPC exists."""
+"""Decky API v1: fixed Hysteria2 VPN operations only."""
 import asyncio
 import os
 from pathlib import Path
@@ -6,35 +6,23 @@ import sys
 
 PLUGIN = Path(os.environ.get("DECKY_PLUGIN_DIR", Path(__file__).resolve().parent))
 sys.path.insert(0, str(PLUGIN))
-from backend.zapret_manager import ZapretManager
+from vpn.manager import Manager
 
 
 class Plugin:
     async def _main(self):
-        self.manager = ZapretManager(PLUGIN)
-        await asyncio.to_thread(self.manager.recover)
+        self.manager = Manager(PLUGIN)
+        try:
+            await asyncio.to_thread(self.manager.retire_old_service)
+        except Exception as e:
+            self.manager.error = str(e)
 
     async def request(self, operation, payload):
         try:
-            data = await asyncio.to_thread(self.manager.dispatch, operation, payload)
-            return {"ok": True, "data": data}
+            return {"ok": True, "data": await asyncio.to_thread(self.manager.dispatch, operation, payload)}
         except Exception as e:
             self.manager.error = str(e)
             return {"ok": False, "error": str(e)}
 
-    async def _unload(self):
-        # The system service remains under the user's explicit enabled choice.
-        self.manager.cancel.set()
-        if self.manager.tune_thread:
-            await asyncio.to_thread(self.manager.tune_thread.join)
-
     async def _uninstall(self):
-        self.manager.cancel.set()
-        if self.manager.tune_thread:
-            await asyncio.to_thread(self.manager.tune_thread.join)
-        # Wait until test worker has restored the saved state before uninstall.
-        await asyncio.to_thread(self._remove)
-
-    def _remove(self):
-        with self.manager.lock:
-            self.manager.uninstall()
+        await asyncio.to_thread(self.manager.uninstall)
