@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Replace the local Zapret2/NFQUEUE startup path with the official Hysteria2
+  ARM64 client in TUN mode, controlled by a compact Decky Game Mode switch.
+- Add root-only server settings and password redaction, default-on TLS
+  verification, explicit opt-in autostart and owned legacy-service migration.
+- Pin the upstream client release digest and package its MIT license.
+
 ## 0.1.1 — experimental prerelease
 
 - Accept `nf_conntrack`, `nfnetlink_queue` and `nft_queue` already present in the

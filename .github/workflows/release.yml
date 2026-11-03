@@ -2,7 +2,7 @@ name: Release
 on:
   workflow_dispatch:
   push:
-    tags: [v0.1.1]
+    tags: [v0.2.0]
 permissions:
   contents: read
 jobs:
@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/ci.yml
   stage:
     needs: validate
-    if: startsWith(github.ref, 'refs/tags/v0.1.1')
+    if: startsWith(github.ref, 'refs/tags/v0.2.0')
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -18,21 +18,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: zapret2-armada-v0.1.1-release
+          name: hysteria2-armada-v0.2.0-release
           path: release
-      - name: Validate checksums and attach to existing release
+      - name: Verify, attach and publish tested release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd release
           sha256sum --check SHA256SUMS
           cd ..
-          python scripts/package.py release/zapret2-armada-v0.1.1-arm64.zip
-          gh release view v0.1.1 --repo "$GITHUB_REPOSITORY" || gh release create v0.1.1 --draft --prerelease --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY"
-          gh release upload v0.1.1 release/* --clobber --repo "$GITHUB_REPOSITORY"
-          gh release edit v0.1.1 --title 'Zapret2 Armada 0.1.1' --prerelease --notes-file docs/RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
-      - name: Publish only for a successfully tested tag
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release edit v0.1.1 --draft=false --prerelease --repo "$GITHUB_REPOSITORY"
+          python scripts/package.py release/hysteria2-armada-v0.2.0-arm64.zip
+          gh release view v0.2.0 --repo "$GITHUB_REPOSITORY" || gh release create v0.2.0 --draft --prerelease --target "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY"
+          gh release upload v0.2.0 release/* --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit v0.2.0 --title 'Hysteria2 Armada 0.2.0' --prerelease --notes-file docs/RELEASE_NOTES.md --repo "$GITHUB_REPOSITORY"
+          gh release edit v0.2.0 --draft=false --prerelease --repo "$GITHUB_REPOSITORY"
