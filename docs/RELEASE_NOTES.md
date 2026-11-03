@@ -1,27 +1,24 @@
-# Hysteria2 Armada 0.2.0
+# SpoofDPI Armada 0.3.0
 
-Experimental ARM64 pre-release. The Decky Game Mode panel now presents one
-compact Hysteria2 VPN switch. Turning it on starts the official Hysteria2
-v2.13.0 client in system-wide TUN mode; turning it off stops the service.
-It routes TCP and UDP over the user's own Hysteria2 server without NFQUEUE.
-ICMP is not tunneled by Hysteria2 TUN mode.
+Pre-release for ARM64 Armada OS. Local SpoofDPI TUN mode now appears as the
+primary compact switch in Decky. It runs DPI bypass on the handheld with a
+direct connection, without NFQUEUE or a remote VPN server. The second switch
+retains Hysteria2 for the occasions when a full VPN is needed. The two services
+cannot run simultaneously from the plugin.
 
-Server, UDP port, authentication, optional Salamander obfuscation and TLS SNI
-are set in a separate Decky settings dialog. Secrets are stored in root-only
-files and omitted from status results. TLS validation defaults to enabled.
-Autostart is opt-in. Upgrade retires only the previous plugin's owned service
-and nftables table; its old domain configuration is retained.
+Two TLS strategies are available: SNI split with two fake packets by default,
+or a stronger chunk split. UDP fake packets are disabled by default to preserve
+game compatibility and direct latency. The upstream SpoofDPI TUN implementation
+intercepts IPv4 TCP/UDP; IPv6 traffic is outside this mode.
 
-The binary is pinned to the upstream release SHA256 and verified by CI.
-The ARM64 ZIP and source ZIP include license notices and SHA256SUMS.
+The package contains pinned upstream SpoofDPI v1.5.5 and Hysteria2 v2.13.0
+ARM64 executables with license notices. CI verifies checksums, ARM64 execution,
+service syntax and installable ZIP checksums.
 
-## Known limitations
+## Device test required
 
-- No real AYN Odin 3 / Armada 6.11.0 hardware connection test yet. The
-  kernel must expose /dev/net/tun and Decky must allow the root service.
-- TUN routing is managed by Hysteria2. VPN mode is not a replacement for the
-  old Zapret2 strategy editor or its domain list.
-- Server must be reachable over UDP; authentication, Salamander password and
-  TLS SNI must match the user's server. An unreachable server cannot be fixed
-  by a plugin switch.
-- A VPN routes traffic via the server and may increase game latency.
+No physical Odin 3 / Armada 6.11.0 test is available to the maintainer. The
+kernel must provide `/dev/net/tun`; available network routes and permissions
+must allow a TUN interface. Check the status, logs, direct public IP, blocked
+sites and an actual game after installing. SpoofDPI's upstream TUN mode is
+experimental. No single DPI strategy works for every provider or restriction.

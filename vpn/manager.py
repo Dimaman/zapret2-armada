@@ -82,7 +82,7 @@ class Manager:
     def status(self):
         c = self.store.load()
         return {"config": public(c), "active": self.active(), "installed": self.installed(),
-                "version": "0.2.0", "error": self.error}
+                "version": "0.3.0", "error": self.error}
 
     def retire_old_service(self):
         # Upgrade from the prior plugin: never touch files with another owner.

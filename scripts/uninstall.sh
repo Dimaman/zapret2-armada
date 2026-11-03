@@ -3,4 +3,4 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ $EUID -eq 0 ]] || { echo 'Run with sudo.' >&2; exit 1; }
-exec /usr/bin/python3 -c 'from pathlib import Path; from vpn.manager import Manager; Manager(Path.cwd()).uninstall()'
+exec /usr/bin/python3 -c 'from pathlib import Path; from dpi.manager import DpiManager; from vpn.manager import Manager; DpiManager(Path.cwd()).uninstall(); Manager(Path.cwd()).uninstall()'
