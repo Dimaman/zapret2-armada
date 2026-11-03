@@ -17,7 +17,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def download(url, limit):
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
-    request = urllib.request.Request(url, headers={"User-Agent": "Zapret2-Armada/0.1.0", "Accept": "application/json, text/plain"})
+    request = urllib.request.Request(url, headers={"User-Agent": "Zapret2-Armada/0.1.1", "Accept": "application/json, text/plain"})
     with opener.open(request, timeout=15) as response:
         if response.status != 200:
             raise ValueError("Domain source did not return HTTP 200")

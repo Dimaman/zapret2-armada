@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parents[1]
 plugin=json.loads((root/'plugin.json').read_text())
 package=json.loads((root/'package.json').read_text())
 assert plugin['api_version']==1 and plugin['flags']==['root']
-assert package['type']=='module' and package['version']=='0.1.0'
+assert package['type']=='module' and package['version']=='0.1.1'
 assert 'remote_binary' not in package
 assert 'GNU GENERAL PUBLIC LICENSE' in (root/'LICENSE').read_text()
 for path in ['main.py','backend/service.py','configs/zapret2-armada.service','src/index.tsx','docs/INSTALL_RU.md','docs/HARDWARE_TEST_RU.md','THIRD_PARTY_NOTICES.md']:

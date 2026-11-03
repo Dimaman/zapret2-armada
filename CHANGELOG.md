@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 — experimental prerelease
+
+- Accept `nf_conntrack`, `nfnetlink_queue` and `nft_queue` already present in the
+  running kernel even if `modprobe` cannot find a loadable module for the release.
+- Show an actionable kernel-dependency error if a required component is absent.
+- Show when starting was requested but nfqws2 remains stopped in the Decky panel.
+- First Odin 3 startup attempt failed at `modprobe nf_conntrack` for
+  `/lib/modules/6.11.0`; actual kernel support and this fix still need device testing.
+
 ## 0.1.0 — experimental prerelease
 
 - Native nfqws2 1.0.6 with matching Lua, pinned-source ARM64 build.

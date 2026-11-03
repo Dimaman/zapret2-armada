@@ -65,7 +65,7 @@ class ZapretManager:
         info = self.plugin / "bin/build-info.json"
         version = json.loads(info.read_text()) if info.exists() else {"version": "not built"}
         return {"config": c, "installed": self.installed(), "service_active": active, "engine_running": engine,
-                "plugin_version": "0.1.0", "engine_version": version["version"],
+                "plugin_version": "0.1.1", "engine_version": version["version"],
                 "os": Path("/etc/os-release").read_text(), "error": configuration_error or self.error,
                 "tuning": self.tuning, "progress": self.progress, "tune_result": self.tune_result}
 

@@ -2,10 +2,11 @@
 
 Experimental Decky Loader plugin for **Armada OS / ARM64**. The native engine
 is **nfqws2 from Zapret2 v1.0.6**, with matching Lua. No FEX, Wine or Proton is
-used to execute it. Development: `feature/v0.1.0`, target: `main`.
+used to execute it. Patch development: `fix/kernel-module-detection`, target: `main`.
 
-**AYN Odin 3 hardware testing has not been performed.** Kernel NFQUEUE support,
-Decky integration, Wi-Fi resume and performance need device verification.
+**First AYN Odin 3 startup attempt failed at kernel module loading.** The
+v0.1.1 preflight change still needs validation on the device. Kernel NFQUEUE
+support, Wi-Fi resume and performance remain unverified.
 A draft release must not be treated as an installable release.
 
 - React/TypeScript, @decky/api v1, @decky/ui, Russian/English.
