@@ -1,7 +1,12 @@
-# Zapret2 Armada 0.1.0
+# Zapret2 Armada 0.1.1
 
 Experimental Pre-release. Native ARM64 nfqws2 (Zapret2 v1.0.6), Lua 5.4.8.
 No FEX/Wine/Proton is used by the engine. Host filtering also covers translated games.
+
+Compared with v0.1.0, installation accepts required kernel modules already
+present in the running kernel even if modprobe cannot find their files. A
+genuinely unavailable dependency produces a clearer error. The Decky panel
+now distinguishes a start request from a running nfqws2 process.
 
 Russian/English Decky interface, enable/disable/restart, bounded profile editing
 and import, domain/exclusion editing/export, systemd persistence, rotating logs,
@@ -19,8 +24,9 @@ plugin support. The immutable Fedora bootc image is not modified.
 
 ## Known limitations
 
-- Not tested on real AYN Odin 3 or the user's Armada/Decky version. Sleep/resume,
-  Wi-Fi, FPS, battery and ISP effectiveness need device verification.
+- First Odin 3 startup test failed: `nf_conntrack` was not found under
+  `/lib/modules/6.11.0`. This update has not been retested on that device.
+  Sleep/resume, Wi-Fi, FPS, battery and ISP effectiveness remain unverified.
 - Some Armada kernels may omit NFQUEUE/nft_queue. Missing support prevents startup;
   the plugin does not install or replace a kernel.
 - Templates are syntax/Lua tested, not ISP-certified. HTTPS probes cannot prove
@@ -37,6 +43,6 @@ plugin support. The immutable Fedora bootc image is not modified.
   exports contain your domain configuration and system information.
 - x86_64 engine is tested as preparation for Steam Deck; this release packages ARM64 only.
 
-Assets: zapret2-armada-v0.1.0-arm64.zip, zapret2-armada-v0.1.0-source.zip,
+Assets: zapret2-armada-v0.1.1-arm64.zip, zapret2-armada-v0.1.1-source.zip,
 SHA256SUMS. Complete engine/library sources and license notices are included.
 Incomplete or failed builds must remain a draft, not an installable release.

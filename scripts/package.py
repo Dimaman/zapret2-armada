@@ -47,13 +47,13 @@ def package():
     OUT.mkdir(exist_ok=True)
     common=['main.py','backend','configs','LICENSE','THIRD_PARTY_NOTICES.md','README.md','CHANGELOG.md','docs','package.json','plugin.json']
     runtime=files(common+['scripts/install.sh','scripts/uninstall.sh','dist/index.js','bin','lua','files'])
-    archive=OUT/'zapret2-armada-v0.1.0-arm64.zip'
+    archive=OUT/'zapret2-armada-v0.1.1-arm64.zip'
     assert (ROOT/'bin/nfqws2').read_bytes()[18:20]==b'\xb7\x00','Refusing non-ARM64 package'
     with zipfile.ZipFile(archive,'w') as z:
         for f in runtime:put(z,PREFIX+str(f.relative_to(ROOT)),f.read_bytes(),f.name=='nfqws2' or f.suffix=='.sh')
         for f in files(['build/licenses']):put(z,PREFIX+'LICENSES/'+str(f.relative_to(ROOT/'build/licenses')),f.read_bytes())
         for f in files(['.cache/sources']):put(z,PREFIX+'sources/'+f.name,f.read_bytes())
-    source=OUT/'zapret2-armada-v0.1.0-source.zip'
+    source=OUT/'zapret2-armada-v0.1.1-source.zip'
     with zipfile.ZipFile(source,'w') as z:
         for f in files(common+['src','scripts','tests','.github','.gitignore','package-lock.json','tsconfig.json','rollup.config.js','.cache/sources']):
             put(z,PREFIX+str(f.relative_to(ROOT)),f.read_bytes(),f.suffix=='.sh')

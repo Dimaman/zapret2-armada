@@ -38,7 +38,7 @@ def build():
     for name, item in lock.items():
         archive = CACHE / item["file"]
         if not archive.exists():
-            req = urllib.request.Request(item["url"], headers={"User-Agent": "zapret2-armada-source-builder/0.1.0"})
+            req = urllib.request.Request(item["url"], headers={"User-Agent": "zapret2-armada-source-builder/0.1.1"})
             with urllib.request.urlopen(req, timeout=90) as r:
                 archive.write_bytes(r.read(20_000_000))
         if hashlib.sha256(archive.read_bytes()).hexdigest() != item["sha256"]:

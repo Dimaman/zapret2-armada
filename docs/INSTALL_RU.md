@@ -6,11 +6,11 @@ NFQUEUE/nft_queue в ядре, curl/getent/modprobe, Decky API v1 и root-пла
 frontend/src/components/settings/pages/developer/index.tsx и
 backend/decky_loader/browser.py. Версия Decky на вашем Odin ещё не проверена.
 
-1. Войти в GitHub, скачать ZIP и SHA256SUMS из приватного релиза. Проверить SHA256.
+1. Скачать ZIP и SHA256SUMS из релиза v0.1.1. Проверить SHA256.
 2. В Desktop Mode сохранить ZIP, например в Downloads.
 3. Gaming Mode → Decky → Settings → Developer → установка из локального ZIP.
    При необходимости включить режим разработчика Decky. Выбрать
-   zapret2-armada-v0.1.0-arm64.zip, не распаковывая его.
+   zapret2-armada-v0.1.1-arm64.zip, не распаковывая его.
 4. Zapret2 Armada → Диагностика → «Подготовить / обновить службу».
 5. При отсутствии NFQUEUE/nft_queue остановиться. Плагин не устанавливает
    новое ядро и не меняет bootc-образ. Нужна Armada с соответствующей поддержкой.
@@ -21,6 +21,10 @@ backend/decky_loader/browser.py. Версия Decky на вашем Odin ещё 
 /etc/systemd/system/zapret2-armada.service,
 /etc/modules-load.d/zapret2-armada.conf. Запись в /usr не требуется.
 После обновления плагина повторить подготовку службы для обновления её копии.
+Если установлен v0.1.0, установить ZIP v0.1.1 через Decky поверх прежнего
+плагина и повторить «Подготовить / обновить службу». Если Decky отклоняет
+обновление поверх установленного ZIP, сначала удалить прежний плагин через
+Decky и затем установить v0.1.1. Настройки остаются в /var/lib/zapret2-armada.
 
 Домены: добавить/удалить строки в редакторе. Вставка списка — импорт.
 Исключения имеют приоритет. Экспорт показывает JSON для копирования.

@@ -1,7 +1,9 @@
 # Проверка на AYN Odin 3 / Armada OS
 
-Реального тестирования Odin 3 пока не было. Автоматические тесты не заменяют
-проверку устройства. Перед установкой выполнить только чтение состояния:
+Первая попытка запуска на Odin 3 остановилась при загрузке `nf_conntrack`:
+`Module nf_conntrack not found in directory /lib/modules/6.11.0`.
+Изменение v0.1.1 ещё не проверено на устройстве. Перед установкой выполнить
+только чтение состояния:
 
 ```bash
 uname -m
@@ -11,6 +13,9 @@ python3 --version
 ldd --version
 modprobe -n nfnetlink_queue
 modprobe -n nft_queue
+cat /proc/sys/kernel/osrelease
+ls -1 /lib/modules
+ls -d /sys/module/{nf_conntrack,nfnetlink_queue,nft_queue}
 systemctl status plugin_loader.service --no-pager
 ```
 

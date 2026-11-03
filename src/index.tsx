@@ -41,7 +41,7 @@ function Content() {
       {!s && button(t.refresh,() => void reload(),false)}
     </PanelSection>
     {s && page === "dashboard" && <PanelSection title="Zapret2 Armada">
-      <PanelSectionRow><ToggleField label={t.enable} checked={s.config.enabled} disabled={disabled} onChange={enabled => configure({enabled})} /></PanelSectionRow>
+      <PanelSectionRow><ToggleField label={t.enable} description={s.config.enabled && !s.engine_running ? t.startPending : undefined} checked={s.config.enabled} disabled={disabled} onChange={enabled => configure({enabled})} /></PanelSectionRow>
       <PanelSectionRow><div style={{fontSize:15,lineHeight:1.6}}>
         <b>nfqws2: {s.engine_running ? t.active : t.inactive}</b><br />
         systemd: {s.service_active ? t.active : t.inactive}<br />

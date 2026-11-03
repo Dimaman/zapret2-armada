@@ -6,6 +6,7 @@ from pathlib import Path
 import time
 from .commands import run
 from .config_manager import domain
+from .kernel_modules import REQUIRED, inspect_module
 from .strategy_manager import elf_machine
 
 
@@ -56,7 +57,7 @@ def system(app, runner=run):
     check("nftables", lambda: runner(["/usr/sbin/nft", "--version"]).stdout)
     check("systemd", lambda: runner(["/usr/bin/systemctl", "--version"]).stdout.splitlines()[0])
     check("NFQUEUE kernel interface", lambda: Path("/proc/net/netfilter/nfnetlink_queue").read_text())
-    check("nft_queue module or built-in", lambda: runner(["/usr/sbin/modprobe", "-n", "nft_queue"]).stdout or "available")
-    check("nfnetlink_queue module or built-in", lambda: runner(["/usr/sbin/modprobe", "-n", "nfnetlink_queue"]).stdout or "available")
+    for module in REQUIRED:
+        check(f"{module} module or built-in", lambda name=module: inspect_module(name, runner))
     os_release = Path("/etc/os-release").read_text()
     return {"checks": checks, "os_release": os_release, "kernel": platform.release(), "hardware_tested": False}
